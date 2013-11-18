@@ -1,0 +1,20 @@
+#cmake files#
+#############
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+#large pcl files#
+#################
+*.pcd
+*.list
+*.h5
+*.idx
+*.tbz
+
+#compiled binaries#
+#############
+vfhTrain
+vfhTest
