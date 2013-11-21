@@ -148,8 +148,7 @@ int main (int argc, char **argv)
         pcl::search::KdTree<pcl::PointXYZ>::Ptr vfhsTree (new pcl::search::KdTree<pcl::PointXYZ>);
         vfh.setSearchMethod(vfhsTree);
         pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs (new pcl::PointCloud<pcl::VFHSignature308>);
-        Eigen::Vector3f viewPoint(1.0, 0.0, 0.0);
-        vfh.setViewPoint(viewPoint(0), viewPoint(1), viewPoint(2));
+        vfh.setViewPoint(1, 1, 1);
 
         //compute vfhs features
         vfh.setInputCloud(cloud);
@@ -163,17 +162,16 @@ int main (int argc, char **argv)
         }
         training.push_front(vfhModel);
 
-        /*
         //visualize point cloud
+        /*
         pcl::visualization::PCLVisualizer visu("viewer");
         visu.addPointCloud<pcl::PointXYZ> (cloud, ColorHandler(cloud, 0.0 , 255.0, 0.0), "cloud");
-        visu.addPointCloudNormals<pcl::PointXYZ, pcl::Normal>(cloud, normals, 5, 0.01f, "normals", 0);
         visu.addCoordinateSystem (0.01, 0);
 
         //visualize histogram
         pcl::visualization::PCLHistogramVisualizer histvis;
         histvis.addFeatureHistogram<pcl::VFHSignature308> (*vfhs, histLength);
-        visu.spinOnce (2000);
+        visu.spinOnce (500);
         */
     }
 

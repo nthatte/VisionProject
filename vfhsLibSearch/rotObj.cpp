@@ -95,10 +95,10 @@ int main (int argc, char **argv)
     pcl::PCDWriter writer;
     for (size_t i = 0; i < numThetas; ++i)
     {
-        theta = 2*M_PI * i / numThetas;
+        theta = M_PI * i / numThetas;
         for (size_t j = 0; j < numPhis; ++j)
         {
-            phi = M_PI * j / numPhis;
+            phi = M_PI/2 * j / numPhis;
 
             //transform pointcloud
             rotation = Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(phi, Eigen::Vector3f::UnitX());
