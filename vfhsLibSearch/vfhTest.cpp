@@ -9,8 +9,6 @@
 #include <pcl/features/vfh.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree_flann.h>
-//#include <pcl/visualization/pcl_visualizer.h>
-//#include <pcl/visualization/histogram_visualizer.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/eigen.h>
 #include <pcl/common/transforms.h>
@@ -42,7 +40,7 @@ bool loadFileList (std::vector<float> &angles, const std::string &filename)
     std::string line;
     while (!fs.eof ())
     {
-        getline (fs, line);
+        std::getline (fs, line);
         if (line.empty ())
             continue;
         std::string angleStr = line;
@@ -158,7 +156,7 @@ int main (int argc, char **argv)
     std::string training_data_h5_file_name = "training_data.h5";
     std::string training_data_list_file_name = "training_data.list";
 
-    //allocate matrices
+    //allocate flann matrices
     std::vector<float> angles;
     flann::Matrix<int> k_indices;
     flann::Matrix<float> k_distances;
