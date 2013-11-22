@@ -32,14 +32,21 @@ const int histLength = 308;
   * \param list of angle
   * \param filename the input file name
   */
-bool loadAngleData (std::vector<std::pair<float, float> > &v_angles, const std::string &filename)
+struct CloudInfo
+{
+    float theta; //angle about z axis
+    float phi; // angle about x axis
+    boost::filesystem::path filePath;
+};
+
+bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &filename)
 {
     ifstream fs;
     fs.open (filename.c_str ());
     if (!fs.is_open () || fs.fail ())
         return (false);
 
-    std::pair<float, float> angles;
+    CloudInfo cloudinfo;
     std::string line;
     while (!fs.eof ())
     {
@@ -47,15 +54,21 @@ bool loadAngleData (std::vector<std::pair<float, float> > &v_angles, const std::
         std::getline (fs, line, ' ');
         if (line.empty ())
             continue;
-        angles.first = boost::lexical_cast<float>(line);
+        cloudinfo.theta = boost::lexical_cast<float>(line);
 
         //read phi
+        std::getline (fs, line, ' ');
+        if (line.empty ())
+            continue;
+        cloudinfo.phi = boost::lexical_cast<float>(line);
+
+        //read filename
         std::getline (fs, line);
         if (line.empty ())
             continue;
-        angles.second = boost::lexical_cast<float>(line);
-
-        v_angles.push_back (angles);
+        cloudinfo.filePath = boost::filesystem::path(line);
+        cloudinfo.filePath.replace_extension(".pcd");
+        cloudInfoList.push_back (cloudinfo);
     }
     fs.close ();
     return (true);
@@ -85,7 +98,7 @@ nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::Poin
 }
 
 /** \brief Returns closest poses of of objects in training data to the query object
-    \param -i the path to the input point cloud
+    \param -q the path to the input point cloud
     \param -k the number of nearest neighbors to return
     \param -theta the query angle about the z axis in degrees
     \param -phi the query angle about the x axis in degrees
@@ -125,6 +138,7 @@ int main (int argc, char **argv)
 
     //read in point cloud
     PointCloud::Ptr cloud (new PointCloud);
+    pcl::PCDReader reader;
     //read ply file
     pcl::PolygonMesh triangles;
     if(queryCloudPath.extension().native().compare(".ply") == 0)
@@ -139,7 +153,6 @@ int main (int argc, char **argv)
     //read pcd file
     else if(queryCloudPath.extension().native().compare(".pcd") == 0)
     {
-        pcl::PCDReader reader;
         if( reader.read(queryCloudPath.native(), *cloud) == -1)
         {
             PCL_ERROR("Could not read .pcd file\n");
@@ -192,13 +205,15 @@ int main (int argc, char **argv)
     std::string kdtreeIdxFileName = "training_kdtree.idx";
 
     //allocate flann matrices
-    std::vector<std::pair<float, float> > angles;
+    std::vector<CloudInfo> cloudInfoList;
+    std::vector<PointCloud::Ptr> cloudList;
+    cloudList.resize(k);
     flann::Matrix<int> k_indices;
     flann::Matrix<float> k_distances;
     flann::Matrix<float> data;
 
     //load training data angles list
-    loadAngleData(angles, anglesFileName);
+    loadAngleData(cloudInfoList, anglesFileName);
     flann::load_from_file (data, featuresFileName, "training_data");
     flann::Index<flann::ChiSquareDistance<float> > index (data, flann::SavedIndexParams ("training_kdtree.idx"));
 
@@ -210,23 +225,68 @@ int main (int argc, char **argv)
     pcl::console::print_highlight ("The closest %d neighbors are:\n", k);
     for (int i = 0; i < k; ++i)
     {
+        //print nearest neighbor info to screen
         pcl::console::print_info ("    %d - theta = %f, phi = %f  (%d) with a distance of: %f\n", 
             i, 
-            angles.at(k_indices[0][i]).first*180.0/M_PI, 
-            angles.at(k_indices[0][i]).second*180.0/M_PI, 
+            cloudInfoList.at(k_indices[0][i]).theta*180.0/M_PI, 
+            cloudInfoList.at(k_indices[0][i]).phi*180.0/M_PI, 
             k_indices[0][i],
             k_distances[0][i]);
+
+        //retrieve pointcloud and store in list
+        PointCloud::Ptr cloudMatch (new PointCloud);
+        reader.read(cloudInfoList.at(k_indices[0][i]).filePath.native(), *cloudMatch);
+        cloudList[i] = cloudMatch;
     }
 
     //visualize histogram
+    /*
     pcl::visualization::PCLHistogramVisualizer histvis;
     histvis.addFeatureHistogram<pcl::VFHSignature308> (*vfhs, histLength);
+    */
 
-    //Visualize point cloud
-    pcl::visualization::PCLVisualizer visu("viewer");
-    visu.addPointCloud<pcl::PointXYZ> (cloud, ColorHandler(cloud, 0.0 , 255.0, 0.0), "cloud");
-    visu.addPointCloudNormals<pcl::PointXYZ, pcl::Normal>(cloud, normals, 5, 0.01f, "normals", 0);
-    visu.addCoordinateSystem (0.01, 0);
+    //Visualize point cloud and matches
+    //viewpoint cals
+    int y_s = (int)std::floor (sqrt ((double)k));
+    int x_s = y_s + (int)std::ceil ((k / (double)y_s) - y_s);
+    double x_step = (double)(1 / (double)x_s);
+    double y_step = (double)(1 / (double)y_s);
+    int viewport = 0, l = 0, m = 0;
+    std::string viewName = "match number ";
+
+    //setup visualizer and add query cloud 
+    pcl::visualization::PCLVisualizer visu("KNN search");
+    visu.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
+    visu.addPointCloud<pcl::PointXYZ> (cloud, ColorHandler(cloud, 0.0 , 255.0, 0.0), "Query Cloud Cloud", viewport);
+    visu.addText ("Query Cloud", 20, 30, 136.0/255.0, 58.0/255.0, 1, "Query Cloud", viewport); 
+    visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, "Query Cloud", viewport);
+    //visu.addCoordinateSystem (0.01, 0);
+
+    //add matches to plot
+    for(int i = 1; i < (k+1); ++i)
+    {
+        //shift viewpoint
+        ++l;
+        if (l >= x_s)
+        {
+          l = 0;
+          m++;
+        }
+
+        //names and text labels
+        std::string textString = viewName;
+        std::string cloudname = viewName;
+        textString.append(boost::lexical_cast<std::string>(i));
+        cloudname.append(boost::lexical_cast<std::string>(i)).append("cloud");
+
+        //color proportional to distance
+
+        //add cloud
+        visu.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
+        visu.addPointCloud<pcl::PointXYZ> (cloudList[i-1], ColorHandler(cloudList[i-1], 0.0 , 255.0, 0.0), cloudname, viewport);
+        visu.addText (textString, 20, 30, 136.0/255.0, 58.0/255.0, 1, textString, viewport);
+        visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, textString, viewport);
+    }
     visu.spin();
 
     return 0;

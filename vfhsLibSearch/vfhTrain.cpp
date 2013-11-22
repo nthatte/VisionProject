@@ -30,6 +30,7 @@ struct VFHModel
 {
     float theta; //angle about z axis
     float phi; // angle about x axis
+    boost::filesystem::path filePath;
     float hist[histLength];
 };
 
@@ -77,18 +78,24 @@ bool loadPointCloud(const boost::filesystem::path &path, PointCloud &cloud)
 */
 bool loadAngleData(const boost::filesystem::path &path, VFHModel &vfhModel)
 {
+    //open file
     std::cout << "Loading: " << path.filename() << std::endl;
     ifstream fs;
     fs.open (path.c_str());
     if (!fs.is_open () || fs.fail ())
         return false;
 
+    //load angle data
     std::string angle;
     std::getline (fs, angle);
     vfhModel.theta = boost::lexical_cast<float>(angle);
     std::getline (fs, angle);
     vfhModel.phi = boost::lexical_cast<float>(angle);
     fs.close ();
+
+    //save filename
+    vfhModel.filePath = path;
+    vfhModel.filePath.replace_extension(".pcd");
     return true;
 }   
     
@@ -201,7 +208,7 @@ int main (int argc, char **argv)
     fs.open (anglesFileName.c_str ());
     for(it = training.begin(); it != training.end(); ++it)
     {
-        fs << it->theta << " " << it->phi << "\n";
+        fs << it->theta << " " << it->phi << " " << it->filePath.native() << "\n";
     }
     fs.close ();
 
