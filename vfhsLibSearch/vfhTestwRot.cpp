@@ -100,6 +100,8 @@ nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::Poin
 /** \brief Returns closest poses of of objects in training data to the query object
     \param -q the path to the input point cloud
     \param -k the number of nearest neighbors to return
+    \param -theta the query angle about the z axis in degrees
+    \param -phi the query angle about the x axis in degrees
 */
 int main (int argc, char **argv)
 {
@@ -112,6 +114,27 @@ int main (int argc, char **argv)
     int k = 1;
     pcl::console::parse_argument (argc, argv, "-k", k);
     pcl::console::print_highlight ("using %d nearest neighbors.\n", k); 
+
+    //read theta argument
+    float theta;
+    if(pcl::console::parse_argument (argc, argv, "-theta", theta) == -1)
+    {
+        PCL_ERROR("You must specify a query theta angle.\n");
+        return -1;
+    }
+
+    //read phi argument
+    float phi;
+    if(pcl::console::parse_argument (argc, argv, "-phi", phi) == -1)
+    {
+        PCL_ERROR("You must specify a query phi angle");
+        return -1;
+    }
+    pcl::console::print_highlight ("Query theta = %f degrees.\n", theta); 
+    pcl::console::print_highlight ("Query phi = %f degrees.\n", phi); 
+    theta *= M_PI/180;
+    phi   *= M_PI/180;
+
 
     //read in point cloud
     PointCloud::Ptr cloud (new PointCloud);
@@ -147,6 +170,13 @@ int main (int argc, char **argv)
     Eigen::Matrix<float,4,1> centroid;
     pcl::compute3DCentroid(*cloud, centroid);
     pcl::demeanPointCloud(*cloud, centroid, *cloud);
+
+    //Rotate object to query pose
+    Eigen::Matrix3f rotation; 
+    std::cout << theta << " " << phi << std::endl;
+    rotation = Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ()) * 
+        Eigen::AngleAxisf(phi, Eigen::Vector3f::UnitX());
+    pcl::transformPointCloud(*cloud, *cloud, Eigen::Affine3f(rotation));
 
     //Estimate normals
     Normals::Ptr normals (new Normals);

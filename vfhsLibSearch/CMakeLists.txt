@@ -27,6 +27,10 @@ if(HDF5_FOUND)
     target_link_libraries (vfhTest ${PCL_LIBRARIES} ${Boost_LIBRARIES}
         ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})
 
+    add_executable (vfhTestwRot vfhTestwRot.cpp)
+    target_link_libraries (vfhTestwRot ${PCL_LIBRARIES} ${Boost_LIBRARIES}
+        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})
+
     add_executable (rotObj rotObj.cpp)
     target_link_libraries (rotObj ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 

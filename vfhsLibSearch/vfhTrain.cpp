@@ -155,7 +155,7 @@ int main (int argc, char **argv)
         pcl::search::KdTree<pcl::PointXYZ>::Ptr vfhsTree (new pcl::search::KdTree<pcl::PointXYZ>);
         vfh.setSearchMethod(vfhsTree);
         pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs (new pcl::PointCloud<pcl::VFHSignature308>);
-        vfh.setViewPoint(1, 1, 1);
+        vfh.setViewPoint(1, 0, 0);
 
         //compute vfhs features
         vfh.setInputCloud(cloud);
