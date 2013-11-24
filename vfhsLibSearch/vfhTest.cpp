@@ -196,11 +196,11 @@ int main (int argc, char **argv)
     for (int i = 0; i < k; ++i)
     {
         //print nearest neighbor info to screen
-        pcl::console::print_info ("    %d - theta = %f, phi = %f  (%d) with a distance of: %f\n", 
+        pcl::console::print_info ("    %d - theta = %f, phi = %f  (%s) with a distance of: %f\n", 
             i, 
             cloudInfoList.at(k_indices[0][i]).theta*180.0/M_PI, 
             cloudInfoList.at(k_indices[0][i]).phi*180.0/M_PI, 
-            k_indices[0][i],
+            cloudInfoList.at(k_indices[0][i]).filePath.c_str(), 
             k_distances[0][i]);
 
         //retrieve pointcloud and store in list
@@ -235,7 +235,7 @@ int main (int argc, char **argv)
     visu.addPointCloud<pcl::PointXYZ> (cloud, ColorHandler(cloud, 0.0 , 255.0, 0.0), "Query Cloud Cloud", viewport);
     visu.addText ("Query Cloud", 20, 30, 136.0/255.0, 58.0/255.0, 1, "Query Cloud", viewport); 
     visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, "Query Cloud", viewport);
-    //visu.addCoordinateSystem (0.01, 0);
+    visu.addCoordinateSystem (0.05, 0);
 
     //add matches to plot
     for(int i = 1; i < (k+1); ++i)
