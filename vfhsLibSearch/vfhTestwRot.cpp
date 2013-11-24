@@ -236,6 +236,11 @@ int main (int argc, char **argv)
         //retrieve pointcloud and store in list
         PointCloud::Ptr cloudMatch (new PointCloud);
         reader.read(cloudInfoList.at(k_indices[0][i]).filePath.native(), *cloudMatch);
+
+        //Move point cloud so it is is centered at the origin
+        pcl::compute3DCentroid(*cloudMatch, centroid);
+        pcl::demeanPointCloud(*cloudMatch, centroid, *cloudMatch);
+
         cloudList[i] = cloudMatch;
     }
 
