@@ -51,10 +51,10 @@ bool loadPointCloud(const boost::filesystem::path &path, PointCloud &cloud)
             return false;
         }
 #if PCL17
-        pcl::fromPCLPointCloud2(triangles.cloud, *cloud);
+        pcl::fromPCLPointCloud2(triangles.cloud, cloud);
 #endif
 #if PCL16
-        pcl::fromROSMsg(triangles.cloud, *cloud);
+        pcl::fromROSMsg(triangles.cloud, cloud);
 #endif
     }
     //read pcd file

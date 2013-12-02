@@ -101,7 +101,8 @@ int main (int argc, char **argv)
         PCL_ERROR("Could not read file\n");
         return(-1);
     }
-    pcl::fromPCLPointCloud2(triangles.cloud, *cloudRAW);
+    //pcl::fromPCLPointCloud2(triangles.cloud, *cloudRAW);
+    pcl::fromROSMsg(triangles.cloud, *cloudRAW);
 
     //read pcd file
     /*

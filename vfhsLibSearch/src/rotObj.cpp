@@ -64,7 +64,12 @@ int main (int argc, char **argv)
             PCL_ERROR("Could not read .ply file\n");
             return(-1);
         }
+#if PCL17
         pcl::fromPCLPointCloud2(triangles.cloud, *cloud);
+#endif
+#if PCL16
+        pcl::fromROSMsg(triangles.cloud, *cloud);
+#endif
     }
     //read pcd file
     else if(inputCloudPath.extension().native().compare(".pcd") == 0)
