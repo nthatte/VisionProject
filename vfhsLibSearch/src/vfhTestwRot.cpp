@@ -81,9 +81,10 @@ bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &fi
   * \param indices the resultant neighbor indices
   * \param distances the resultant neighbor distances
   */
-inline void
-nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs, int k, flann::Matrix<int> &indices, flann::Matrix<float> &distances)
-{
+void nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, 
+                     pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs, 
+                     int k, flann::Matrix<int> &indices, 
+                     flann::Matrix<float> &distances) {
     //store in flann query point
     flann::Matrix<float> p = flann::Matrix<float>(new float[histLength], 1, histLength);
     for(size_t i = 0; i < histLength; ++i)
