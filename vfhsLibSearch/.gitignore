@@ -1,21 +1,15 @@
-#cmake files#
-#############
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-install_manifest.txt
-
-#large pcl files#
-#################
+/build
 *.pcd
+*.ply
+*.txt
+*.png
+cmake_install.cmake
+Makefile
+/CMakeFiles
+
+#flann files#
+#################
 *.list
 *.h5
 *.idx
 *.tbz
-
-#compiled binaries#
-#############
-vfhTrain
-vfhTest
-rotObj

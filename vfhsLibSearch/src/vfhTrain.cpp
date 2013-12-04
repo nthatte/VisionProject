@@ -20,12 +20,8 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#inlcude "vfhLib.h"
 
-typedef pcl::PointCloud<pcl::Normal> Normals;
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-typedef pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler;
-
-const int histLength = 308;
 struct VFHModel
 {
     float theta; //angle about z axis
@@ -34,54 +30,11 @@ struct VFHModel
     float hist[histLength];
 };
 
-/** \brief loads either a .pcd or .ply file into a pointcloud 
-    \param cloud pointcloud to load data into
-    \param path path to pointcloud file
-*/
-bool loadPointCloud(const boost::filesystem::path &path, PointCloud &cloud)
-{
-    std::cout << "Loading: " << path.filename() << std::endl;
-    //read ply file
-    pcl::PolygonMesh triangles;
-    if(path.extension().native().compare(".ply") == 0)
-    {
-        if( pcl::io::loadPolygonFilePLY(path.native(), triangles) == -1)
-        {
-            PCL_ERROR("Could not read .ply file\n");
-            return false;
-        }
-#if PCL17
-        pcl::fromPCLPointCloud2(triangles.cloud, cloud);
-#endif
-#if PCL16
-        pcl::fromROSMsg(triangles.cloud, cloud);
-#endif
-    }
-    //read pcd file
-    else if(path.extension().native().compare(".pcd") == 0)
-    {
-        pcl::PCDReader reader;
-        if( reader.read(path.native(), cloud) == -1)
-        {
-            PCL_ERROR("Could not read .pcd file\n");
-            return false;
-        }
-    }
-    else
-    {
-        
-        PCL_ERROR("File must have extension .ply or .pcd\n");
-        return false;
-    }
-    return true;
-}
-   
-
 /** \brief loads either angle data corresponding  
     \param path path to .txt file containing angle information
     \param vfhModel stuct to load theta and phi angles into
 */
-bool loadAngleData(const boost::filesystem::path &path, VFHModel &vfhModel)
+bool loadCloudAngleData(const boost::filesystem::path &path, VFHModel &vfhModel)
 {
     //open file
     std::cout << "Loading: " << path.filename() << std::endl;
@@ -92,7 +45,7 @@ bool loadAngleData(const boost::filesystem::path &path, VFHModel &vfhModel)
 
     //load angle data
     std::string angle;
-    std::getline (fs, angle);
+    std::getline (fs, angle, ' ');
     vfhModel.theta = boost::lexical_cast<float>(angle);
     std::getline (fs, angle);
     vfhModel.phi = boost::lexical_cast<float>(angle);
@@ -137,12 +90,14 @@ int main (int argc, char **argv)
         angleDataPath = dirItr->path();
         angleDataPath.replace_extension(".txt");
         VFHModel vfhModel;
-        if(!loadAngleData(angleDataPath, vfhModel))
+        if(!loadCloudAngleData(angleDataPath, vfhModel))
             return -1;
 
         //Move point cloud so it is is centered at the origin
+        /**
         pcl::compute3DCentroid(*cloud, centroid);
         pcl::demeanPointCloud(*cloud, centroid, *cloud);
+        */
 
         //setup normal estimation class
         Normals::Ptr normals (new Normals);
@@ -160,7 +115,7 @@ int main (int argc, char **argv)
         pcl::search::KdTree<pcl::PointXYZ>::Ptr vfhsTree (new pcl::search::KdTree<pcl::PointXYZ>);
         vfh.setSearchMethod(vfhsTree);
         pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs (new pcl::PointCloud<pcl::VFHSignature308>);
-        vfh.setViewPoint(1, 0, 0);
+        vfh.setViewPoint(0, 0, 0);
 
         //compute vfhs features
         vfh.setInputCloud(cloud);

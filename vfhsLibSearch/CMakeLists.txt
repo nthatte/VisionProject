@@ -6,7 +6,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 project(vfh_pose_detector)
 
 find_package(PCL 1.6 REQUIRED)
-add_definitions(-DPCL16)
+add_definitions(-DPCL17)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
@@ -19,6 +19,9 @@ if(HDF5_FOUND)
     include_directories(${FLANN_INCLUDE_DIRS})
 
     include_directories(${HDF5_INCLUDE_DIR})
+
+    add_executable (rotObj src/rotObj.cpp)
+    target_link_libraries (rotObj ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
     add_executable (vfhTrain src/vfhTrain.cpp)
     target_link_libraries (vfhTrain ${PCL_LIBRARIES} ${Boost_LIBRARIES}
