@@ -34,7 +34,7 @@ struct CloudInfo
   * \param list of angle
   * \param filename the input file name
   */
-bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &filename)
+static bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &filename)
 {
     ifstream fs;
     fs.open (filename.c_str ());
@@ -76,8 +76,7 @@ bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &fi
   * \param indices the resultant neighbor indices
   * \param distances the resultant neighbor distances
   */
-inline void
-nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs, int k, flann::Matrix<int> &indices, flann::Matrix<float> &distances)
+static void nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs, int k, flann::Matrix<int> &indices, flann::Matrix<float> &distances)
 {
     //store in flann query point
     flann::Matrix<float> p = flann::Matrix<float>(new float[histLength], 1, histLength);
@@ -197,8 +196,8 @@ int main (int argc, char **argv)
 
     //Visualize point cloud and matches
     //viewpoint cals
-    int y_s = (int)std::floor (sqrt ((double)k));
-    int x_s = y_s + (int)std::ceil ((k / (double)y_s) - y_s);
+    int y_s = (int)std::floor (sqrt ((double)(k+1)));
+    int x_s = y_s + (int)std::ceil (((k+1) / (double)y_s) - y_s);
     double x_step = (double)(1 / (double)x_s);
     double y_step = (double)(1 / (double)y_s);
     int viewport = 0, l = 0, m = 0;
@@ -206,7 +205,7 @@ int main (int argc, char **argv)
 
     //setup visualizer and add query cloud 
     pcl::visualization::PCLVisualizer visu("KNN search");
-    visu.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
+    visu.createViewPort (0, 0, x_step, y_step, viewport);
 
     //Move point cloud so it is is centered at the origin
     Eigen::Matrix<float,4,1> centroid;
@@ -234,8 +233,6 @@ int main (int argc, char **argv)
         std::string cloudname = viewName;
         textString.append(boost::lexical_cast<std::string>(i));
         cloudname.append(boost::lexical_cast<std::string>(i)).append("cloud");
-
-        //color proportional to distance
 
         //add cloud
         visu.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);

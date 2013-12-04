@@ -77,7 +77,7 @@ struct CloudInfo
   * \param list of angle
   * \param filename the input file name
   */
-bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &filename)
+static bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &filename)
 {
     ifstream fs;
     fs.open (filename.c_str ());
@@ -122,7 +122,7 @@ bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::string &fi
   * \param indices the resultant neighbor indices
   * \param distances the resultant neighbor distances
   */
-void nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs, int k, flann::Matrix<int> &indices, flann::Matrix<float> &distances)
+static void nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs, int k, flann::Matrix<int> &indices, flann::Matrix<float> &distances)
 {
     //store in flann query point
     flann::Matrix<float> p = flann::Matrix<float>(new float[histLength], 1, histLength);
@@ -144,7 +144,7 @@ void nearestKSearch (flann::Index<flann::ChiSquareDistance<float> > &index, pcl:
     \param yaw yaw angle
     \param visMatch whether or not to visualze the closest match
 */
-bool getPose (const PointCloud &cloud, float &roll, float &pitch, float &yaw, const bool visMatch);
+bool getPose (const PointCloud::Ptr &cloud, float &roll, float &pitch, float &yaw, const bool visMatch)
 {
     //Estimate normals
     Normals::Ptr normals (new Normals);
@@ -179,7 +179,7 @@ bool getPose (const PointCloud &cloud, float &roll, float &pitch, float &yaw, co
     flann::Matrix<float> data;
 
     //load training data angles list
-    loadAngleData(cloudInfoList, anglesFileName)
+    if(!loadAngleData(cloudInfoList, anglesFileName))
         return false;
     flann::load_from_file (data, featuresFileName, "training_data");
     flann::Index<flann::ChiSquareDistance<float> > index (data, flann::SavedIndexParams ("training_kdtree.idx"));
@@ -198,11 +198,12 @@ bool getPose (const PointCloud &cloud, float &roll, float &pitch, float &yaw, co
         pcl::console::print_info ("roll = %f, pitch = %f, yaw = %f,  (%s) with a distance of: %f\n", 
             roll*180.0/M_PI, pitch*180.0/M_PI, yaw*180.0/M_PI, 
             cloudInfoList.at(k_indices[0][0]).filePath.c_str(), 
-            k_distances[0][i]);
+            k_distances[0][0]);
 
         //retrieve matched pointcloud
         PointCloud::Ptr cloudMatch (new PointCloud);
-        reader.read(cloudInfoList.at(k_indices[0][i]).filePath.native(), *cloudMatch);
+        pcl::PCDReader reader;
+        reader.read(cloudInfoList.at(k_indices[0][0]).filePath.native(), *cloudMatch);
 
         //Move point cloud so it is is centered at the origin
         Eigen::Matrix<float,4,1> centroid;
@@ -217,8 +218,8 @@ bool getPose (const PointCloud &cloud, float &roll, float &pitch, float &yaw, co
 
         //Visualize point cloud and matches
         //viewpoint calcs
-        int y_s = (int)std::floor (sqrt ((double)k));
-        int x_s = y_s + (int)std::ceil ((k / (double)y_s) - y_s);
+        int y_s = (int)std::floor (sqrt (2.0));
+        int x_s = y_s + (int)std::ceil ((2.0 / (double)y_s) - y_s);
         double x_step = (double)(1 / (double)x_s);
         double y_step = (double)(1 / (double)y_s);
         int viewport = 0, l = 0, m = 0;
@@ -230,7 +231,7 @@ bool getPose (const PointCloud &cloud, float &roll, float &pitch, float &yaw, co
         //Move point cloud so it is is centered at the origin
         PointCloud::Ptr cloudDemeaned (new PointCloud);
         pcl::compute3DCentroid(*cloud, centroid);
-        pcl::demeanPointCloud(*cloud, centroid, *cloudDemaned);
+        pcl::demeanPointCloud(*cloud, centroid, *cloudDemeaned);
         visu.addPointCloud<pcl::PointXYZ> (cloudDemeaned, ColorHandler(cloud, 0.0 , 255.0, 0.0), "Query Cloud Cloud", viewport);
 
         visu.addText ("Query Cloud", 20, 30, 136.0/255.0, 58.0/255.0, 1, "Query Cloud", viewport); 

@@ -10,6 +10,7 @@ add_definitions(-DPCL17)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
+add_library(vfhlib src/vfhLib.cpp)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeFiles/Modules/")
 
 find_package(HDF5)
@@ -20,22 +21,19 @@ if(HDF5_FOUND)
 
     include_directories(${HDF5_INCLUDE_DIR})
 
-    add_executable (rotObj src/rotObj.cpp)
-    target_link_libraries (rotObj ${PCL_LIBRARIES} ${Boost_LIBRARIES})
-
     add_executable (vfhTrain src/vfhTrain.cpp)
     target_link_libraries (vfhTrain ${PCL_LIBRARIES} ${Boost_LIBRARIES}
-        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})
+        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} vfhlib)
 
     add_executable (vfhTest src/vfhTest.cpp)
     target_link_libraries (vfhTest ${PCL_LIBRARIES} ${Boost_LIBRARIES}
-        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})
+        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} vfhlib)
 
-    add_executable (vfhTestwRot src/vfhTestwRot.cpp)
-    target_link_libraries (vfhTestwRot ${PCL_LIBRARIES} ${Boost_LIBRARIES}
-        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})
+    #add_executable (vfhTestwRot src/vfhTestwRot.cpp)
+    #target_link_libraries (vfhTestwRot ${PCL_LIBRARIES} ${Boost_LIBRARIES}
+    #    ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})
 
-    add_executable (rotObj src/rotObj.cpp)
-    target_link_libraries (rotObj ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+    #add_executable (rotObj src/rotObj.cpp)
+    #target_link_libraries (rotObj ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
 endif(HDF5_FOUND)

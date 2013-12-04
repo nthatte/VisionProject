@@ -20,7 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <list>
-#inlcude "vfhLib.h"
+#include "vfhLib.h"
 
 struct VFHModel
 {

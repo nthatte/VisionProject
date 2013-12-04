@@ -19,6 +19,6 @@ bool loadPointCloud(const boost::filesystem::path &path, PointCloud &cloud);
     \param yaw yaw angle
     \param visMatch whether or not to visualze the closest match
 */
-bool getPose (const PointCloud &cloud, float &roll, float &pitch, float &yaw, const bool visMatch);
+bool getPose (const PointCloud::Ptr &cloud, float &roll, float &pitch, float &yaw, const bool visMatch);
 
 #endif
