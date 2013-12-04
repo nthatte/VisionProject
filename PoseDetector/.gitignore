@@ -1,0 +1,15 @@
+/build
+*.pcd
+*.ply
+*.txt
+*.png
+cmake_install.cmake
+Makefile
+/CMakeFiles
+
+#flann files#
+#################
+*.list
+*.h5
+*.idx
+*.tbz
