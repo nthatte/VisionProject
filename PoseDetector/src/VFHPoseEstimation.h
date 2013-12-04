@@ -1,11 +1,11 @@
 #ifndef VFHPOSEEST_H
 #define VFHPOSEEST_H
 
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 class VFHPoseEstimator
 {
 private:
+    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
     typedef pcl::PointCloud<pcl::Normal> Normals;
     typedef pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler;
     const int histLength;

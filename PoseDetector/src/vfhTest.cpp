@@ -16,8 +16,8 @@ int main (int argc, char **argv)
     std::string queryCloudName;
     pcl::console::parse_argument (argc, argv, "-q", queryCloudName);
     boost::filesystem::path queryCloudPath(queryCloudName);
-    
-    PointCloud::Ptr cloud (new PointCloud);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PCDReader reader;
     if(reader.read(queryCloudPath.native(), *cloud) == -1)
         return -1;
