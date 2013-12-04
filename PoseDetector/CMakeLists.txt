@@ -9,8 +9,11 @@ find_package(PCL 1.6 REQUIRED)
 add_definitions(-DPCL17)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
+
+
 add_definitions(${PCL_DEFINITIONS})
 add_library(VFHPoseEstimation src/VFHPoseEstimation.cpp)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeFiles/Modules/")
 
 find_package(HDF5)
@@ -23,10 +26,10 @@ if(HDF5_FOUND)
 
     add_executable (vfhTrain src/vfhTrain.cpp)
     target_link_libraries (vfhTrain ${PCL_LIBRARIES} ${Boost_LIBRARIES}
-        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} VFHPoseEstimator)
+        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} VFHPoseEstimation)
 
     add_executable (vfhTest src/vfhTest.cpp)
     target_link_libraries (vfhTest ${PCL_LIBRARIES} ${Boost_LIBRARIES}
-        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} VFHPoseEstimator)
+        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} VFHPoseEstimation)
 
 endif(HDF5_FOUND)

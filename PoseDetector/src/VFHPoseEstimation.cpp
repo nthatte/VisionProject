@@ -1,23 +1,3 @@
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-#include <pcl/PolygonMesh.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/io/io.h>
-#include <pcl/io/vtk_lib_io.h>
-#include <pcl/features/vfh.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/common/centroid.h>
-#include <pcl/common/eigen.h>
-#include <pcl/common/transforms.h>
-#include <pcl/console/print.h>
-#include <flann/flann.h>
-#include <flann/io/hdf5.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
-#include <fstream>
-#include <iostream>
 #include "VFHPoseEstimation.h"
 
 /** \brief loads either a .pcd or .ply file into a pointcloud 
