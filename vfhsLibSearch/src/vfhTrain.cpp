@@ -104,7 +104,7 @@ int main (int argc, char **argv)
         pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normEst;
         pcl::search::KdTree<pcl::PointXYZ>::Ptr normTree (new pcl::search::KdTree<pcl::PointXYZ>);
         normEst.setSearchMethod(normTree);
-        normEst.setRadiusSearch(0.005);
+        normEst.setRadiusSearch(0.003);
 
         //estimate normals
         normEst.setInputCloud(cloud);
