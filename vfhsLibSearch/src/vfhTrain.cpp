@@ -24,15 +24,16 @@
 
 struct VFHModel
 {
-    float theta; //angle about z axis
-    float phi; // angle about x axis
+    float roll; //angle about z axis
+    float pitch; // angle about x axis
+    float yaw; // angle about x axis
     boost::filesystem::path filePath;
     float hist[histLength];
 };
 
 /** \brief loads either angle data corresponding  
     \param path path to .txt file containing angle information
-    \param vfhModel stuct to load theta and phi angles into
+    \param vfhModel stuct to load roll, pitch and yaw angles into
 */
 bool loadCloudAngleData(const boost::filesystem::path &path, VFHModel &vfhModel)
 {
@@ -46,9 +47,11 @@ bool loadCloudAngleData(const boost::filesystem::path &path, VFHModel &vfhModel)
     //load angle data
     std::string angle;
     std::getline (fs, angle, ' ');
-    vfhModel.theta = boost::lexical_cast<float>(angle);
+    vfhModel.roll = boost::lexical_cast<float>(angle);
+    std::getline (fs, angle, ' ');
+    vfhModel.pitch = boost::lexical_cast<float>(angle);
     std::getline (fs, angle);
-    vfhModel.phi = boost::lexical_cast<float>(angle);
+    vfhModel.yaw = boost::lexical_cast<float>(angle);
     fs.close ();
 
     //save filename
@@ -104,7 +107,7 @@ int main (int argc, char **argv)
         pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normEst;
         pcl::search::KdTree<pcl::PointXYZ>::Ptr normTree (new pcl::search::KdTree<pcl::PointXYZ>);
         normEst.setSearchMethod(normTree);
-        normEst.setRadiusSearch(0.003);
+        normEst.setRadiusSearch(0.03);
 
         //estimate normals
         normEst.setInputCloud(cloud);
@@ -168,7 +171,7 @@ int main (int argc, char **argv)
     fs.open (anglesFileName.c_str ());
     for(it = training.begin(); it != training.end(); ++it)
     {
-        fs << it->theta << " " << it->phi << " " << it->filePath.native() << "\n";
+        fs << it->roll << " " << it->pitch << " " << it->yaw << " "<< it->filePath.native() << "\n";
     }
     fs.close ();
 

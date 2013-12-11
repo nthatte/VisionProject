@@ -29,6 +29,10 @@ if(HDF5_FOUND)
     target_link_libraries (vfhTest ${PCL_LIBRARIES} ${Boost_LIBRARIES}
         ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} vfhlib)
 
+    add_executable (visClouds src/visClouds.cpp)
+    target_link_libraries (visClouds ${PCL_LIBRARIES} ${Boost_LIBRARIES}
+        ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY} vfhlib)
+
     #add_executable (vfhTestwRot src/vfhTestwRot.cpp)
     #target_link_libraries (vfhTestwRot ${PCL_LIBRARIES} ${Boost_LIBRARIES}
     #    ${FLANN_LIBRARIES} ${HDF5_hdf5_LIBRARY})

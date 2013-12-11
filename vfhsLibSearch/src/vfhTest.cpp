@@ -25,8 +25,9 @@
 
 struct CloudInfo
 {
-    float theta; //angle about z axis
-    float phi; // angle about x axis
+    float roll; 
+    float pitch;
+    float yaw; 
     boost::filesystem::path filePath;
 };
 
@@ -45,17 +46,23 @@ static bool loadAngleData (std::vector<CloudInfo> &cloudInfoList, const std::str
     std::string line;
     while (!fs.eof ())
     {
-        //read theta
+        //read roll
         std::getline (fs, line, ' ');
         if (line.empty ())
             continue;
-        cloudinfo.theta = boost::lexical_cast<float>(line);
+        cloudinfo.roll = boost::lexical_cast<float>(line);
 
-        //read phi
+        //read pitch
         std::getline (fs, line, ' ');
         if (line.empty ())
             continue;
-        cloudinfo.phi = boost::lexical_cast<float>(line);
+        cloudinfo.pitch = boost::lexical_cast<float>(line);
+
+        //read yaw
+        std::getline (fs, line, ' ');
+        if (line.empty ())
+            continue;
+        cloudinfo.yaw = boost::lexical_cast<float>(line);
 
         //read filename
         std::getline (fs, line);
@@ -125,7 +132,7 @@ int main (int argc, char **argv)
     normEst.setInputCloud(cloud);
     pcl::search::KdTree<pcl::PointXYZ>::Ptr normTree (new pcl::search::KdTree<pcl::PointXYZ>);
     normEst.setSearchMethod(normTree);
-    normEst.setRadiusSearch(0.003);
+    normEst.setRadiusSearch(0.03);
     normEst.compute(*normals);
 
     //Create VFH estimation class
@@ -170,10 +177,11 @@ int main (int argc, char **argv)
     for (int i = 0; i < k; ++i)
     {
         //print nearest neighbor info to screen
-        pcl::console::print_info ("    %d - theta = %f, phi = %f  (%s) with a distance of: %f\n", 
+        pcl::console::print_info ("    %d - roll = %f, pitch = %f, yaw = %f, (%s) with a distance of: %f\n", 
             i, 
-            cloudInfoList.at(k_indices[0][i]).theta*180.0/M_PI, 
-            cloudInfoList.at(k_indices[0][i]).phi*180.0/M_PI, 
+            cloudInfoList.at(k_indices[0][i]).roll*180.0/M_PI, 
+            cloudInfoList.at(k_indices[0][i]).pitch*180.0/M_PI, 
+            cloudInfoList.at(k_indices[0][i]).yaw*180.0/M_PI, 
             cloudInfoList.at(k_indices[0][i]).filePath.c_str(), 
             k_distances[0][i]);
 
@@ -220,12 +228,14 @@ int main (int argc, char **argv)
     Eigen::Matrix<float,4,1> centroid;
     pcl::compute3DCentroid(*cloud, centroid);
     pcl::demeanPointCloud(*cloud, centroid, *cloud);
-    visu.addPointCloud<pcl::PointXYZ> (cloud, ColorHandler(cloud, 0.0 , 255.0, 0.0), "Query Cloud Cloud", viewport);
-    visu.addPointCloudNormals<pcl::PointXYZ, pcl::Normal> (cloud, normals, 1, 0.01, "Query Cloud Normals", viewport);
+    visu.addPointCloud<pcl::PointXYZ> (cloud, ColorHandler(cloud, 3.0 , 28.0, 72.0), "Query Cloud Cloud", viewport);
+    visu.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "Query Cloud Cloud");
+    //visu.addPointCloudNormals<pcl::PointXYZ, pcl::Normal> (cloud, normals, 1, 0.01, "Query Cloud Normals", viewport);
 
-    visu.addText ("Query Cloud", 20, 30, 136.0/255.0, 58.0/255.0, 1, "Query Cloud", viewport); 
-    visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, "Query Cloud", viewport);
-    visu.addCoordinateSystem (0.05, 0);
+    //visu.addText ("Query Cloud", 20, 30, 136.0/255.0, 58.0/255.0, 1, "Query Cloud", viewport); 
+    //visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, "Query Cloud", viewport);
+    //visu.addCoordinateSystem (0.05, 0);
+    visu.setBackgroundColor(1.0, 1.0, 1.0);
 
     //add matches to plot
     for(int i = 1; i < (k+1); ++i)
@@ -248,11 +258,14 @@ int main (int argc, char **argv)
 
         //add cloud
         visu.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
-        visu.addPointCloud<pcl::PointXYZ> (cloudList[i-1], ColorHandler(cloudList[i-1], 0.0 , 255.0, 0.0), cloudname, viewport);
-        visu.addPointCloudNormals<pcl::PointXYZ, pcl::Normal> (cloudList[i-1], cloudNormList[i-1], 1, 0.01, normalname, viewport);
-        visu.addText (textString, 20, 30, 136.0/255.0, 58.0/255.0, 1, textString, viewport);
-        visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, textString, viewport);
+        visu.addPointCloud<pcl::PointXYZ> (cloudList[i-1], ColorHandler(cloudList[i-1], 3.0 , 28.0, 72.0), cloudname, viewport);
+        visu.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, cloudname);
+        visu.setBackgroundColor(1.0, 1.0, 1.0);
+        //visu.addPointCloudNormals<pcl::PointXYZ, pcl::Normal> (cloudList[i-1], cloudNormList[i-1], 1, 0.01, normalname, viewport);
+        //visu.addText (textString, 20, 30, 136.0/255.0, 58.0/255.0, 1, textString, viewport);
+        //visu.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, textString, viewport);
     }
+    //visu.setSize(1280,720);
     visu.spin();
 
     return 0;
